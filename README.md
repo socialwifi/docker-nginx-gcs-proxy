@@ -1,6 +1,8 @@
 # docker-nginx-gcs-proxy
-A Docker image for running Nginx as a caching proxy for Google Cloud Storage
+A Docker image for running Nginx as a caching proxy for Google Cloud Storage.
 
+This is the Git repo for the Docker image built automatically at Docker Hub - 
+[jgoclawski/nginx-gcs-proxy](https://hub.docker.com/r/jgoclawski/nginx-gcs-proxy/).
 
 ## Usage
 

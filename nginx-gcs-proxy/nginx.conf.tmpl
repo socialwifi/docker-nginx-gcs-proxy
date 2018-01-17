@@ -1,0 +1,96 @@
+user nginx;
+worker_processes  1;
+
+error_log  /var/log/nginx/error.log warn;
+pid        /var/run/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include           /etc/nginx/mime.types;
+    default_type      application/octet-stream;
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log        /var/log/nginx/access.log  main;
+    server_tokens     off;
+    gzip              on;
+    gzip_disable      "msie6";
+    gzip_comp_level   6;
+    gzip_min_length   1100;
+    gzip_buffers      16 8k;
+    gzip_proxied      any;
+    gzip_types
+        text/plain
+        text/css
+        text/js
+        text/xml
+        text/javascript
+        application/javascript
+        application/x-javascript
+        application/json
+        application/xml
+        application/xml+rss;
+    proxy_cache_path  /var/cache/nginx keys_zone=google-cloud-storage:10m inactive=60m;
+    resolver          8.8.8.8 valid=300s ipv6=off;
+    resolver_timeout  10s;
+
+    upstream google-cloud-storage {
+       server          'storage.googleapis.com';
+       keepalive       100;
+   }
+
+    server {
+        listen          {{ .Env.LISTEN_PORT }};
+
+        if ( $request_method !~ "GET|HEAD" ) {
+            return 405;
+        }
+
+        location = / {
+            rewrite ^.*$ /index.html last;
+        }
+
+        location = /healthz/ {
+            access_log off;
+            return 200;
+        }
+
+        location / {
+            proxy_set_header        Host storage.googleapis.com;
+            proxy_set_header        Cookie "";
+            proxy_set_header        Authorization "";
+            proxy_set_header        Connection "";
+            proxy_hide_header       x-goog-hash;
+            proxy_hide_header       x-goog-generation;
+            proxy_hide_header       x-goog-metageneration;
+            proxy_hide_header       x-goog-stored-content-encoding;
+            proxy_hide_header       x-goog-stored-content-length;
+            proxy_hide_header       x-goog-storage-class;
+            proxy_hide_header       x-guploader-uploadid;
+            proxy_hide_header       x-xss-protection;
+            proxy_hide_header       accept-ranges;
+            proxy_hide_header       alternate-protocol;
+            proxy_hide_header       Set-Cookie;
+            proxy_hide_header       Expires;
+            proxy_hide_header       Cache-Control;
+            proxy_ignore_headers    Set-Cookie;
+            proxy_http_version      1.1;
+            proxy_intercept_errors  on;
+            proxy_method            GET;
+            proxy_pass_request_body off;
+
+            proxy_ignore_headers    Expires Cache-Control;
+            proxy_cache             google-cloud-storage;
+            proxy_cache_key         "$host/$proxy_host$uri";
+            proxy_cache_valid       200 1d;
+            add_header              X-Cache $upstream_cache_status;
+
+            proxy_pass              http://google-cloud-storage/{{ .Env.GCS_BUCKET_URL }}$uri;
+        }
+    }
+}

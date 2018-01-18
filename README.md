@@ -2,12 +2,12 @@
 A Docker image for running Nginx as a caching proxy for Google Cloud Storage.
 
 This is the Git repo for the Docker image built automatically at Docker Hub - 
-[jgoclawski/nginx-gcs-proxy](https://hub.docker.com/r/jgoclawski/nginx-gcs-proxy/).
+[socialwifi/nginx-gcs-proxy](https://hub.docker.com/r/socialwifi/nginx-gcs-proxy/).
 
 ## Usage
 
 ```bash
-docker run -d -e GCS_BUCKET_URL="[bucket/folder]" -p 8080:8080 jgoclawski/nginx-gcs-proxy
+docker run -d -e GCS_BUCKET_URL="[bucket/folder]" -p 8080:8080 socialwifi/nginx-gcs-proxy
 
 ```
 
@@ -48,12 +48,12 @@ curl -v http://127.0.0.1:8080/healthz/
 ## Building
 
 ```bash
-docker build nginx-gcs-proxy -t jgoclawski/nginx-gcs-proxy
+docker build nginx-gcs-proxy -t socialwifi/nginx-gcs-proxy
 
 ```
 
 ## Testing
 
 ```bash
-docker run --rm -e GCS_BUCKET_URL="dummy" jgoclawski/nginx-gcs-proxy nginx -t
+docker run --rm -e GCS_BUCKET_URL="dummy" socialwifi/nginx-gcs-proxy nginx -t
 ```

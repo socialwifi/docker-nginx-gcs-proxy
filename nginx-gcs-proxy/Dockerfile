@@ -11,6 +11,7 @@ COPY nginx.conf.tmpl /etc/nginx/nginx.conf.tmpl
 
 ENV GCS_BUCKET_URL " "
 ENV LISTEN_PORT "8080"
+ENV NOT_FOUND_MEANS_INDEX "false"
 
 ENTRYPOINT ["dockerize", \
             "-template", \
